@@ -1,0 +1,4 @@
+add_executable(test_string_util test_string_util.cpp)
+target_link_libraries(test_string_util zkv_util)
+add_executable(test_util test_util.cpp)
+target_link_libraries(test_util zkv_util)
