@@ -1,0 +1,2 @@
+add_executable(cache_test cache_test.cpp)
+target_link_libraries(cache_test zkv_memory zkv_util zkv_db)

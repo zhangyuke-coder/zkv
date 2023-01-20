@@ -51,7 +51,7 @@ class MutexLock final {
 
 class SpinLock final {
 #ifndef __APPLE__
-  SpinLock() { pthread_spin_init(&spin_lock_, NULL); }
+  SpinLock() { pthread_spin_init(&spin_lock_, 0); }
   ~SpinLock() { pthread_spin_destroy(&spin_lock_); }
   void Lock() { pthread_spin_lock(&spin_lock_); }
   void UnLock() { pthread_spin_unlock(&spin_lock_); }

@@ -118,7 +118,7 @@ message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_T
 add_subdirectory(db)
 add_subdirectory(utils)
 add_subdirectory(memory)
-
+add_subdirectory(caches)
 # if(MUDUO_BUILD_EXAMPLES)
 #   add_subdirectory(contrib)
 #   add_subdirectory(examples)
