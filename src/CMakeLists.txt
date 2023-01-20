@@ -20,7 +20,7 @@ set(CXX_FLAGS
  # -DVALGRIND
  -DCHECK_PTHREAD_RETURN_VALUE
  -D_FILE_OFFSET_BITS=64
- -Wall
+#  -Wall
  -Wextra
  -Werror
 #  -Wconversion
@@ -111,7 +111,7 @@ find_package(GTest REQUIRED)
 # GTest 的头文件
 include_directories(${GTEST_INCLUDE_DIRS})
 
-
+include_directories(${PROJECT_SOURCE_DIR})
 
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
 

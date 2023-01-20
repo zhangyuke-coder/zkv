@@ -1,2 +1,4 @@
 add_executable(comparator_test comparator_test.cpp)
 target_link_libraries(comparator_test zkv_db)
+add_executable(skiplist_test skiplist_test.cpp)
+target_link_libraries(skiplist_test zkv_memory zkv_util zkv_db)
