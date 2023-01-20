@@ -1,0 +1,2 @@
+add_executable(comparator_test comparator_test.cpp)
+target_link_libraries(comparator_test zkv_db)

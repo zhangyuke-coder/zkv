@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22.1)
 
 project(ZKV C CXX)
 
-# enable_testing()
+enable_testing()
 
 # if(NOT CMAKE_BUILD_TYPE)
 #   set(CMAKE_BUILD_TYPE "Release")
@@ -25,7 +25,7 @@ set(CXX_FLAGS
  -Werror
 #  -Wconversion
  -Wno-unused-parameter
- -Wold-style-cast
+#  -Wold-style-cast
  -Woverloaded-virtual
  -Wpointer-arith
  -Wshadow
@@ -104,10 +104,20 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 # include_directories(${PROJECT_SOURCE_DIR})
 
 # string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
+
+
+# 查找 GTest 库
+find_package(GTest REQUIRED)
+# GTest 的头文件
+include_directories(${GTEST_INCLUDE_DIRS})
+
+
+
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
 
-# add_subdirectory(db)
+add_subdirectory(db)
 add_subdirectory(utils)
+add_subdirectory(memory)
 
 # if(MUDUO_BUILD_EXAMPLES)
 #   add_subdirectory(contrib)

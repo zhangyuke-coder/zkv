@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../lib/libzkv_util.a CMakeFiles/zkv_util.dir/codec.cpp.o CMakeFiles/zkv_util.dir/crc32.cpp.o CMakeFiles/zkv_util.dir/hash_util.cpp.o CMakeFiles/zkv_util.dir/string_util.cpp.o CMakeFiles/zkv_util.dir/util.cpp.o
-/usr/bin/ranlib ../lib/libzkv_util.a

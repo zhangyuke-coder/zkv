@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -DCHECK_PTHREAD_RETURN_VALUE -D_FILE_OFFSET_BITS=64 -Wall -Wextra -Werror -Wno-unused-parameter -Wold-style-cast -Woverloaded-virtual -Wpointer-arith -Wshadow -Wwrite-strings -march=native -std=c++17 -rdynamic -Wno-implicit-fallthrough CMakeFiles/test_util.dir/test_util.cpp.o -o ../../bin/test_util  ../../lib/libzkv_util.a 

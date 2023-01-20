@@ -7,6 +7,10 @@ namespace crc32 {
 // Return the crc32c of concat(A, data[0,n-1]) where init_crc is the
 // crc32c of some string A.  Extend() is often used to maintain the
 // crc32c of a stream of data.
+
+// 返回 concat(A, data[0,n-1]) 的 crc32c，其中 init_crc 是
+// 某个字符串 A 的 crc32c。Extend() 通常用于维护
+// 数据流的 crc32c。
 uint32_t Extend(uint32_t init_crc, const char* data, size_t n);
 
 // Return the crc32c of data[0,n-1]
