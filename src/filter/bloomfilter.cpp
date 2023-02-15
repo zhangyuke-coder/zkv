@@ -1,4 +1,8 @@
 #include "bloomfilter.h"
+
+#include "utils/codec.h"
+#include "utils/hash_util.h"
+#include <cmath>
 namespace zkv {
 BloomFilter::BloomFilter(int32_t bits_per_key) : bits_per_key_(bits_per_key) {
     CalcHashNum();

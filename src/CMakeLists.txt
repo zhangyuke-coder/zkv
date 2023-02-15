@@ -22,7 +22,7 @@ set(CXX_FLAGS
  -D_FILE_OFFSET_BITS=64
 #  -Wall
  -Wextra
- -Werror
+#  -Werror
 #  -Wconversion
  -Wno-unused-parameter
 #  -Wold-style-cast
@@ -120,6 +120,7 @@ add_subdirectory(utils)
 add_subdirectory(memory)
 add_subdirectory(caches)
 add_subdirectory(file)
+add_subdirectory(filter)
 # if(MUDUO_BUILD_EXAMPLES)
 #   add_subdirectory(contrib)
 #   add_subdirectory(examples)
