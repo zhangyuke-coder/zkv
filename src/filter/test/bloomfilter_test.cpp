@@ -28,6 +28,11 @@ int main() {
     } else {
         std::cout << "no" << std::endl;
     }
+    if(filter->MayMatch("678", pos, 0)) {
+        std::cout << "yes" << std::endl;
+    } else {
+        std::cout << "no" << std::endl;
+    }
      if(filter->MayMatch("13", pos, 0)) {
         std::cout << "yes" << std::endl;
     } else {
