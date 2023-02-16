@@ -2,6 +2,7 @@
 #include <string>
 #include <string_view>
 #include "../db/options.h"
+#include "../filter/filter_policy.h"
 namespace zkv {
 
 class DataBlockBuilder final {
@@ -19,7 +20,9 @@ public:
         restarts_.clear();
         restarts_.emplace_back(0);
         buffer_.clear();
-
+        is_finished_ = false;
+        pre_key_ = "";
+        restart_pointer_counter_ = 0;
     }
 
 
