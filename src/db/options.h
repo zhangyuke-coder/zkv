@@ -2,7 +2,7 @@
 #include <memory>
 #include <stdint.h>
 #include "../caches/cache.h"
-
+#include "../table/data_block.h"
 namespace zkv {
 class FilterPolicy;
 class Comparator;
@@ -27,6 +27,9 @@ struct Options {
     std::shared_ptr<FilterPolicy> filter_policy = nullptr;
 
     std::shared_ptr<Comparator> comparator = nullptr;
-    // Cache<uint64_t, DataBlock>* block_cache = nullptr;
+    Cache<uint64_t, DataBlock>* block_cache = nullptr;
+};
+struct ReadOptions {
+
 };
 }

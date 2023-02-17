@@ -8,7 +8,7 @@
 #include "db/comparator.h"
 #include "file/file.h"
 #include "filter/bloomfilter.h"
-// #include "table/table.h"
+#include "table/table.h"
 // #include "logger/log.h"
 
 using namespace std;
@@ -34,6 +34,9 @@ TEST(table_builder_Test, Add) {
   delete file_handler;
   delete tb;
   FileReader file_reader(st);
+  Table tab(&options, &file_reader);
+  tab.Open(FileTool::GetFileSize(st));
+  tab
 //   Table tab(&options, &file_reader);
 //   tab.Open(FileTool::GetFileSize(st));
 }
