@@ -58,6 +58,8 @@
         "list": "cpp",
         "unordered_set": "cpp",
         "optional": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp"
     }
 }

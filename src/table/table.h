@@ -20,7 +20,9 @@ public:
     Iterator* NewIterator(const ReadOptions&) const;
     Iterator* BlockReader(const ReadOptions&,
                             const std::string_view&);
-
+    DataBlock* Index_block() {
+        return index_block_.get();
+    }
 
 private:
     const FileReader* file_reader_;

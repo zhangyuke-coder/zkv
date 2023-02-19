@@ -8,12 +8,15 @@ DataBlock::DataBlock(const std::string_view& contents)
     : data_(contents.data()),
       size_(contents.size()),
       owned_(false) {
+        
     if(size_ < sizeof(uint32_t)) {
         size_ = 0;
     } else {
         size_t max_restart_allowed = (size_ - sizeof(uint32_t)) / sizeof(uint32_t);
         uint32_t num_restart_size = NumRestarts();
+        printf("num_restart_size:%u: \n", num_restart_size);
         if(num_restart_size > max_restart_allowed) {
+            printf("num_restart_size:%u: \n", num_restart_size);
             size_ = 0;
         } else {
             restart_offset_ = size_ - (1 + num_restart_size) * sizeof(uint32_t);

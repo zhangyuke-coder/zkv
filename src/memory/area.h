@@ -16,7 +16,7 @@ public:
     void Deallocate(void* p, int32_t n);
 private:
     char* AllocateFallback(uint32_t bytes);
-    char* AllocateNewBlocks(uint32_t block_bytes);
+    char* AllocateNewBlock(uint32_t block_bytes);
     char* alloc_ptr_;
     uint32_t alloc_bytes_remaining_;
     std::vector<char*> blocks_;

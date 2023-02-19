@@ -33,10 +33,7 @@ TEST(table_builder_Test, Add) {
   tb->Finish();
   delete file_handler;
   delete tb;
-  FileReader file_reader(st);
-  Table tab(&options, &file_reader);
-  tab.Open(FileTool::GetFileSize(st));
-  tab
+
 //   Table tab(&options, &file_reader);
 //   tab.Open(FileTool::GetFileSize(st));
 }

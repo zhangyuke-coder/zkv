@@ -144,7 +144,7 @@ DBStatus FileReader::Read(uint64_t offset, size_t n,
 
 
     pread(fd_, result->data(), n, static_cast<off_t>(offset));
-    printf("%s\n", result->c_str());
+    // printf("%s\n", result->c_str());
     return Status::kSuccess;
 }
 

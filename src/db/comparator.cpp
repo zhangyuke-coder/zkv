@@ -26,7 +26,7 @@ void ByteComparator::FindShortest(std::string& start,
     }
     if (first_diff_pos < min_len) {
         char diff_ch = start[first_diff_pos];
-        if ((diff_ch + 1) < limit[first_diff_pos]) {
+        if (diff_ch < 0xff && (diff_ch + 1) < limit[first_diff_pos]) {
             start[first_diff_pos]++;
             // diff_pos+1是因为diff_pos从0开始计算
             start.resize(first_diff_pos + 1);

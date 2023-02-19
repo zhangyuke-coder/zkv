@@ -9,6 +9,7 @@
 #include "data_block.h"
 #include "db/comparator.h"
 #include "filter/filter_policy.h"
+#include <iostream>
 namespace zkv {
 using namespace util;
 
@@ -24,16 +25,23 @@ DBStatus Table::Open(uint64_t file_size) {
     }
     std::string footer_space;
     footer_space.resize(kEncodedLength);
-    auto status = file_reader_->Read(file_size, kEncodedLength, &footer_space);
+    auto status = file_reader_->Read(file_size - kEncodedLength, kEncodedLength, &footer_space);
     if(status != Status::kSuccess) {
         return status;
     }
     Footer footer;
+    // std::cout << footer_space.size() << std::endl;
     std::string_view st = footer_space;
     status = footer.DecodeFrom(&st);
     std::string index_meta_data;
+    
+    // ("%d %d\n", footer.GetIndexBlockMetaData().offset, footer.GetIndexBlockMetaData().length);
+    // ("%d %d\n", footer.GetFilterBlockMetaData().offset, footer.GetFilterBlockMetaData().length);
+    // printf("%d %d\n", footer.GetIndexBlockMetaData().offset, footer.GetIndexBlockMetaData().length);
     ReadBlock(footer.GetIndexBlockMetaData(), index_meta_data);
+    printf("index_meta_date_size :%d \n", index_meta_data.size());
     index_block_ = std::make_unique<DataBlock>(index_meta_data);
+    printf("index_block_size : %d \n",index_block_->size());
     ReadMeta(&footer);
     return status;
 }
