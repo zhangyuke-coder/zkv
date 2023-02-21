@@ -13,7 +13,7 @@ void DataBlockBuilder::AddRestartPointers() {
   if (is_finished_) {
     return;
   }
-  printf("AddRestartPointers::%u \n", restarts_.size());
+  // printf("AddRestartPointers::%u \n", restarts_.size());
   for (const auto& restart : restarts_) {
     PutFixed32(&buffer_, restart);
   }

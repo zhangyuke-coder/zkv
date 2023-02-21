@@ -67,6 +67,7 @@ void TableBuilder::WriteDataBlock(DataBlockBuilder& data_block_builder,
 
   // 将所有的record数据打包
   const std::string& data = data_block_builder.Data();
+  // printf("data %u\n",data);
   WriteBytesBlock(data, options_.block_compress_type, offset_size);
   // 这里直接调用reset操作，主要目的是比较方便，创建一个空对象直接替换也行
   data_block_builder.Reset();

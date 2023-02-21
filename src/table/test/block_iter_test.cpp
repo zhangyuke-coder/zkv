@@ -16,9 +16,21 @@
 
 using namespace std;
 using namespace zkv;
+Options options;
+Iterator* getIter(string_view contents) {
+	DataBlock* dataBlock = new DataBlock(contents);
+	// cout << dataBlock->NumRestarts() << endl;
+	Iterator* iter = dataBlock->NewIterator(options.comparator);
+	delete dataBlock;
+	return iter;
+}
 int main() {
+	options.block_restart_interval = 1;
+	options.block_compress_type = kSnappyCompression;
+	options.filter_policy = std::make_unique<BloomFilter>(30);
+	options.comparator = std::make_unique<ByteComparator>();
 	vector<string> kTestKeys = {};
-	for (int i = 0; i < 1000; ++i) {
+	for (int i = 0; i < 10; ++i) {
 		int idx = i;
 
 		string k = "key";
@@ -29,10 +41,7 @@ int main() {
 	sort(kTestKeys.begin(), kTestKeys.end());
 
 
-	Options options;
-	options.block_compress_type = kSnappyCompression;
-	options.filter_policy = std::make_unique<BloomFilter>(30);
-	options.comparator = std::make_unique<ByteComparator>();
+
 	DataBlockBuilder* blockBuilder = new DataBlockBuilder(&options);
 	for (const auto& k : kTestKeys) {
 		const string_view key = static_cast<string_view>(k);
@@ -43,34 +52,37 @@ int main() {
 		blockBuilder->Add(key, value);
 	}
 	blockBuilder->Finish();
+
 	string data = blockBuilder->Data();
 	delete blockBuilder;
 
 	string_view contents = data;
-	DataBlock* dataBlock = new DataBlock(contents);
-	Iterator* iter = dataBlock->NewIterator(options.comparator);
-	// iter->SeekToFirst();
-	// while (iter->Valid()) {
-	// 	cout << "[" << iter->key() << "," << iter->value() << "]"
-	// 	<< " ";
-	// 	iter->Next();
-	// }
-	// cout << endl;
+	// DataBlock* dataBlock = new DataBlock(contents);
+	// // cout << dataBlock->NumRestarts() << endl;
+	// Iterator* iter = dataBlock->NewIterator(options.comparator);
+	auto iter = getIter(contents);
+	iter->SeekToFirst();
+	while (iter->Valid()) {
+		cout << "[" << iter->key() << "," << iter->value() << "]"
+		<< " ";
+		iter->Next();
+	}
+	cout << endl;
 	// iter->SeekToLast();
 	// while (iter->Valid()) {
 	// 	cout << "[" << iter->key() << "," << iter->value() << "]"
 	// 			<< " ";
 	// 	iter->Prev();
 	// }
-	cout << endl;
-	iter->Seek("key999");
-	cout << iter->value();
-	for (int i = 0; i < 1000; i += 3) {
-		string_view key = static_cast<string_view>(kTestKeys[i]);
-		iter->Seek(key);
-		cout << "[" << iter->key() << "," << iter->value() << "]"
-			<< " ";
-	}
-	cout << endl;
-	delete dataBlock;
+	// cout << endl;
+	// iter->Seek("key2");
+	// cout << iter->value();
+	// for (int i = 0; i < 1000; i += 3) {
+	// 	string_view key = static_cast<string_view>(kTestKeys[i]);
+	// 	iter->Seek(key);
+	// 	cout << "[" << iter->key() << "," << iter->value() << "]"
+	// 		<< " ";
+	// }
+	// cout << endl;
+	// delete dataBlock;
 }

@@ -24,7 +24,7 @@ int main() {
 
     FileWriter* file_handler = new FileWriter(st);
     TableBuilder* tb = new TableBuilder(options, file_handler);
-    // for(int i = 0; i < 100; i++) {
+    // for(int i = 0; i < 10; i++) {
     //     kTestKeys.emplace_back(to_string(i));
     // }
     // for (const auto& item : kTestKeys) {
@@ -32,28 +32,83 @@ int main() {
     // }
     // tb->Finish();
     tb->Add("zyk", "yyds");
+    // tb->Add("zysk", "yyds");
+    // tb->Add("z1sk", "yyds");
     tb->Finish();
-    delete file_handler;
-    delete tb;
-
+    // cout << tb->GetFileSize() << endl;
+    // cout << tb->GetFileSize() << endl;
     ReadOptions option_read;
+    Options option;
+    option.block_compress_type = kSnappyCompression;
+    option.filter_policy = std::make_unique<BloomFilter>(30);
+    option.comparator = std::make_unique<ByteComparator>();
     FileReader file_reader(st);
-    Table tab(&options, &file_reader);
+    Table tab(&option, &file_reader);
     tab.Open(FileTool::GetFileSize(st));
 
     // cout << "talbe_size: " << FileTool::GetFileSize(st) << endl;
     // tab.ReadBlock()
 
-    auto index_ptr = tab.Index_block();
+    // auto index_ptr = tab.Index_block();
     // cout << index_ptr->size() << endl;
-    auto index_iter = index_ptr->NewIterator(options.comparator);
+    // cout << index_ptr->NumRestarts() << endl;
+    // cout << index_ptr->data_ << endl;
+    // auto index_iter = index_ptr->NewIterator(std::make_shared<ByteComparator>());
     // index_iter->SeekToFirst();
     // while(index_iter->Valid()) {
-    //     cout << "[" << index_iter->key() << "," << index_iter->value() << "]"
-    //         << " ";
+    //     // cout << "[" << index_iter->key() << "," << index_iter->value() << "]"
+    //     //     << " ";
+    //     cout << "[" << index_iter->key() << endl;
     //     index_iter->Next();
     //     cout << "z" << endl;
     // }
+    // auto index_iter = tab.GetIndexBlockIter();
+    // std::string_view key = "zyk";
+    // index_iter->Seek(key);
+    // if (index_iter->Valid() && index_iter->key() == key) {
+    // // LOG(corekv::LogLevel::ERROR, "Hit Key=%s",key.data());
+    //     printf("Hit zyasd=%s \n",key.data());
+    //     // ReadFilter(iter->value());
+    // }
+    // tab.Print();
+    delete file_handler;
+    delete tb;
+    // delete index_iter;
     // cout << "success" << endl;
-    //     cout << "success" << endl;
+    // cout << "success" << endl;
 }
+
+
+// #include <iostream>
+// using namespace std;
+
+
+// class base {
+// public:
+//     base() {
+//         cout << "base" << endl;
+//     }
+//     virtual void print(){};
+// };
+
+// class son : public base {
+// public:
+//     son() {
+//         cout << "son" << endl;
+//     }
+//     virtual void print() override{
+//         cout << "asdf" << endl;
+//     }
+// };
+// base* test() {
+//     base* iter;
+//     iter = new son();
+//     // iter->print();
+//     return iter;
+// }
+// int main() {
+//     base* it = test();
+//     // base* it = new son();
+    
+//     it->print();
+// }
