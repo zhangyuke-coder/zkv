@@ -13,7 +13,7 @@
 
 using namespace std;
 using namespace zkv;
-static  vector<string> kTestKeys = {"corekv", "corekv1", "corekv2","corekv3","corekv4","corekv7"};
+// static  vector<string> kTestKeys = {"corekv", "corekv1", "corekv2","corekv3","corekv4","corekv7"};
 int main() {
     static const std::string st = "d.txt";
 
@@ -24,14 +24,21 @@ int main() {
 
     FileWriter* file_handler = new FileWriter(st);
     TableBuilder* tb = new TableBuilder(options, file_handler);
-    // for(int i = 0; i < 10; i++) {
-    //     kTestKeys.emplace_back(to_string(i));
-    // }
-    // for (const auto& item : kTestKeys) {
-    //     tb->Add(item, item);
-    // }
+    vector<string> kTestKeys = {};
+	for (int i = 0; i < 1000; ++i) {
+		int idx = i;
+
+		string k = "key";
+		k += to_string(idx);
+		string_view key = static_cast<string_view>(k);
+		kTestKeys.emplace_back(key);
+	}
+	sort(kTestKeys.begin(), kTestKeys.end());
+    for (const auto& item : kTestKeys) {
+        tb->Add(item, item);
+    }
     // tb->Finish();
-    tb->Add("zyk", "yyds");
+    // tb->Add("zyk", "yyds");
     // tb->Add("zysk", "yyds");
     // tb->Add("z1sk", "yyds");
     tb->Finish();
@@ -45,7 +52,8 @@ int main() {
     FileReader file_reader(st);
     Table tab(&option, &file_reader);
     tab.Open(FileTool::GetFileSize(st));
-
+    auto it = tab.NewIterator(ReadOptions());
+    it->Valid();
     // cout << "talbe_size: " << FileTool::GetFileSize(st) << endl;
     // tab.ReadBlock()
 
