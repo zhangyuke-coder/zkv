@@ -28,8 +28,42 @@ DBStatus Table::Open(uint64_t file_size) {
   Footer footer;
   std::string_view st = footer_space;
   status = footer.DecodeFrom(&st);
-  
-  ReadIndex(&footer);
+  std::string index_meta_data;
+  ReadBlock(footer.GetIndexBlockMetaData(), index_meta_data);
+  std::string_view real_data(index_meta_data.data(),
+                             footer.GetIndexBlockMetaData().length);
+  index_block_ = std::make_shared<DataBlock>(real_data);
+  // std::cout << index_block_->NumRestarts() << std::endl;
+  // testIndex_block();
+  // auto iter = index_block_->NewIterator(options_->comparator);
+  // iter->SeekToFirst();
+  // DBStatus s;
+  //   OffSetSize offset_size;
+  //   OffsetBuilder offset_builder;
+  //   std::string contents;
+  //   offset_builder.Decode(iter->value().data(), offset_size);
+  //   s = ReadBlock(offset_size, contents);
+  //   std::string_view reals_data(contents.data(),
+  //                             offset_size.length);
+  //   DataBlock* dataBlock;
+  //   if (s == Status::kSuccess) {
+  //     dataBlock = new DataBlock(reals_data);
+  //   }
+
+  //   auto itdata = dataBlock->NewIterator(options_->comparator);
+  //   itdata->SeekToFirst();
+  //   while (itdata->Valid()) {
+  //     std::cout << "[" << itdata->key() << "," << itdata->value() << "]"
+  //     << " ";
+  //     itdata->Next();
+  //   }
+  //   std::cout << std::endl;
+
+
+  test_table();
+
+
+  //sssssssssssssssssssssssssssssssssssssssssssssssssssssssss
   ReadMeta(&footer);
   return status;
 }
@@ -55,6 +89,7 @@ DBStatus Table::ReadBlock(const OffSetSize& offset_size, std::string& buf) {
       // LOG(corekv::LogLevel::ERROR, "kNonCompress");
       break;
   }
+  // buf.resize(offset_size.length);
   return Status::kSuccess;
 }
 void Table::ReadMeta(const Footer* footer) {
@@ -71,33 +106,9 @@ void Table::ReadMeta(const Footer* footer) {
   iter->Seek(key);
   if (iter->Valid() && iter->key() == key) {
     // LOG(corekv::LogLevel::ERROR, "Hit Key=%s",key.data());
-    printf("Hit Key=%s \n",key.data());
     ReadFilter(iter->value());
   }
   delete iter;
-}
-void Table::blockIndex(std::string& index_value) {
-
-}
-void Table::ReadIndex(const Footer* footer) {
-
-
-  std::string index_meta_data;
-  ReadBlock(footer->GetIndexBlockMetaData(), index_meta_data);
-  index_string_ = std::string_view(index_meta_data.data(),
-                             footer->GetIndexBlockMetaData().length);
-  index_block_ = std::make_unique<DataBlock>(index_string_);
-  auto index_iter = index_block_->NewIterator(options_->comparator);
-  index_iter->SeekToFirst();
-  while(index_iter->Valid()) {
-      // std::cout << "index_key   " << index_iter->key() << std::endl;
-      // OffsetBuilder build;
-      // OffSetSize off;
-      // build.Decode(index_iter->value().data(), off);
-      index_key_.emplace_back(index_iter->key());
-      index_iter->Next();
-  }
-  // std::cout << "zxcvxc" << std::endl;
 }
 void Table::ReadFilter(const std::string_view& filter_handle_value) {
   OffSetSize offset_size;
@@ -111,7 +122,6 @@ static void DeleteCachedBlock(const uint64_t& key, void* value) {
   delete block;
 }
 static void DeleteBlock(void* arg, void*) {
-  printf("asldjflkasjdflkjsdklfj\n");
   delete reinterpret_cast<DataBlock*>(arg);
 }
 
@@ -120,14 +130,52 @@ static void ReleaseBlock(void* arg, void* h) {
   Cache<uint64_t, DataBlock>* cache = reinterpret_cast<Cache<uint64_t, DataBlock>*>(arg);
   cache->Release(node);
 }
+bool Table::IsContain(std::string_view key) {
+  return options_->filter_policy->MayMatch(key, bf_);
+}
 
-Iterator* Table::BlockReader(OffSetSize offset_size) {
+void Table::test_table() {
+
+  auto iter = index_block_->NewIterator(options_->comparator);
+  iter->SeekToFirst();
+  while (iter->Valid()) {
+    DBStatus s;
+    OffSetSize offset_size;
+    OffsetBuilder offset_builder;
+    std::string contents;
+    offset_builder.Decode(iter->value().data(), offset_size);
+    s = ReadBlock(offset_size, contents);
+    std::string_view reals_data(contents.data(),
+                              offset_size.length);
+    DataBlock* dataBlock;
+    if (s == Status::kSuccess) {
+      dataBlock = new DataBlock(reals_data);
+    }
+
+    auto itdata = dataBlock->NewIterator(options_->comparator);
+    itdata->SeekToFirst();
+    while (itdata->Valid()) {
+      std::cout << "[" << itdata->key() << "," << itdata->value() << "]"
+      << " ";
+      itdata->Next();
+    }
+    std::cout << std::endl;
+    iter->Next();
+  }
+  // std::cout << iter->key() << std::endl;
+  // printf("%u\n", iter->value());
+
+}
+
+
+Iterator* Table::BlockReader(const ReadOptions& options,
+                             const std::string_view& index_value) {
   auto* block_cache = options_->block_cache;
   DataBlock* block = nullptr;
   CacheNode<uint64_t, DataBlock>* cache_handle = nullptr;
-  // OffSetSize offset_size;
-  // OffsetBuilder offset_builder;
-  // offset_builder.Decode(index_value.data(), offset_size);
+  OffSetSize offset_size;
+  OffsetBuilder offset_builder;
+  offset_builder.Decode(index_value.data(), offset_size);
   DBStatus s;
   std::string contents;
   if (block_cache != nullptr) {
@@ -147,16 +195,12 @@ Iterator* Table::BlockReader(OffSetSize offset_size) {
     }
   } else {
     s = ReadBlock(offset_size, contents);
-    std::string_view real_data(contents.data(),
-                             offset_size.length);
     if (s == Status::kSuccess) {
-      block = new DataBlock(real_data);
+      block = new DataBlock(contents);
     }
   }
-  std::string* a = new std::string("asdfasdf");
- 
+
   Iterator* iter;
-  // Iterator* iter = block->NewIterator(options_->comparator);
   if (block != nullptr) {
     iter = block->NewIterator(options_->comparator);
     if (cache_handle == nullptr) {
@@ -167,107 +211,7 @@ Iterator* Table::BlockReader(OffSetSize offset_size) {
   } else {
     iter = NewErrorIterator(s);
   }
-
-
-  iter->SeekToFirst();
-  while(iter->Valid()) {
-    // cout << "[" << index_iter->key() << "," << index_iter->value() << "]"
-    //     << " ";
-    std::cout << "index_key" << iter->key() << std::endl;
-    iter->Next();
-    // std::cout << "z" << std::endl;
-  }
-  // print(iter);
-  // printf("iter_address: %p \n", iter);
-  // return a;
-  // return block->NewIterator(options_->comparator);
-
-
-  // std::string index_meta_data;
-  // ReadBlock(offset_size, index_meta_data);
-  // std::string_view real_data(index_meta_data.data(),
-  //                            offset_size.length);
-  
-  // index_block_ = std::make_unique<DataBlock>(real_data);
-  // Iterator* index_iter = index_block_->NewIterator(std::make_shared<ByteComparator>());
-
-  // index_iter->SeekToFirst();
-  // while(index_iter->Valid()) {
-  //     // cout << "[" << index_iter->key() << "," << index_iter->value() << "]"
-  //     //     << " ";
-  //     std::cout << "index_key" << index_iter->key() << std::endl;
-  //     index_iter->Next();
-  //     // std::cout << "z" << std::endl;
-  // }
   return iter;
-}
-
-
-
-
-
-
-class Table::TwoLevelIter : public Iterator {
-public:
-    TwoLevelIter(const Options* options, std::string_view index_string) :
-      index_string_(index_string), 
-      options_(options) {
-    
-    }
-    void test() {
-
-    }
-    bool Valid() const override {
-      auto index_block_ = std::make_unique<DataBlock>(index_string_);
-      auto index_iter = index_block_->NewIterator(options_->comparator);
-      index_iter->SeekToFirst();
-      while(index_iter->Valid()) {
-        std::cout << "index_key   " << index_iter->key() << std::endl;
-        // OffsetBuilder build;
-        // OffSetSize off;
-        // build.Decode(index_iter->value().data(), off);
-        // index_key_.emplace_back(index_iter->key());
-        index_iter->Next();
-      }
-      return true;
-  }
-  
-
-    void SeekToFirst() override{
-
-    }
-
-    void SeekToLast() override{
-
-    }
-
-    void Seek(const std::string_view& target) override {
-
-    }
-
-    void Next() override{
-
-    }
-
-    void Prev() override{
-
-    }
-    std::string_view key() const override{
-
-    }
-    std::string value() override{
-
-    }
-
-    DBStatus status() const override{
-
-    }
-private:
-  const Options* options_;
-  const std::string_view index_string_;
-};
-Iterator* Table::NewIterator(const ReadOptions&) {
-  return new TwoLevelIter(options_, index_string_);  
 }
 
 }  // namespace corekv

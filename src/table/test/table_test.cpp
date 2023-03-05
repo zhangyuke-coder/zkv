@@ -44,46 +44,28 @@ int main() {
     tb->Finish();
     // cout << tb->GetFileSize() << endl;
     // cout << tb->GetFileSize() << endl;
-    ReadOptions option_read;
-    Options option;
-    option.block_compress_type = kSnappyCompression;
-    option.filter_policy = std::make_unique<BloomFilter>(30);
-    option.comparator = std::make_unique<ByteComparator>();
+    // ReadOptions option_read;
+    // Options option;
+    // option.block_compress_type = kSnappyCompression;
+    // option.filter_policy = std::make_unique<BloomFilter>(30);
+    // option.comparator = std::make_unique<ByteComparator>();
     FileReader file_reader(st);
-    Table tab(&option, &file_reader);
+    Table tab(&options, &file_reader);
     tab.Open(FileTool::GetFileSize(st));
-    auto it = tab.NewIterator(ReadOptions());
-    it->Valid();
-    // cout << "talbe_size: " << FileTool::GetFileSize(st) << endl;
-    // tab.ReadBlock()
+    // tab.test_table();
+    // for (int i = 0; i < 11; ++i) {
+	// 	int idx = i;
 
-    // auto index_ptr = tab.Index_block();
-    // cout << index_ptr->size() << endl;
-    // cout << index_ptr->NumRestarts() << endl;
-    // cout << index_ptr->data_ << endl;
-    // auto index_iter = index_ptr->NewIterator(std::make_shared<ByteComparator>());
-    // index_iter->SeekToFirst();
-    // while(index_iter->Valid()) {
-    //     // cout << "[" << index_iter->key() << "," << index_iter->value() << "]"
-    //     //     << " ";
-    //     cout << "[" << index_iter->key() << endl;
-    //     index_iter->Next();
-    //     cout << "z" << endl;
-    // }
-    // auto index_iter = tab.GetIndexBlockIter();
-    // std::string_view key = "zyk";
-    // index_iter->Seek(key);
-    // if (index_iter->Valid() && index_iter->key() == key) {
-    // // LOG(corekv::LogLevel::ERROR, "Hit Key=%s",key.data());
-    //     printf("Hit zyasd=%s \n",key.data());
-    //     // ReadFilter(iter->value());
-    // }
-    // tab.Print();
-    delete file_handler;
-    delete tb;
-    // delete index_iter;
-    // cout << "success" << endl;
-    // cout << "success" << endl;
+	// 	string k = "key";
+	// 	k += to_string(idx);
+    //     if(tab.IsContain(k)) {
+    //         cout << "yes" << endl;
+    //     } else {
+    //         cout << "no" << endl;
+    //     }
+	// }
+
+    // tab.testIndex_block();
 }
 
 

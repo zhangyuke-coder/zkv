@@ -1,13 +1,8 @@
-#ifndef DB_SKIPLIST_H_
-#define DB_SKIPLIST_H_
-
-#include <assert.h>
+#pragma once
+#include "stdio.h"
 #include <stdint.h>
-
 #include <atomic>
-#include <new>
-
-#include "utils/random_util.h"
+#include "../utils/random_util.h"
 namespace zkv {
 struct SkipListOption {
   static constexpr int32_t kMaxHeight = 20;
@@ -32,6 +27,7 @@ class SkipList final {
     if (nullptr != node) {
       if (Equal(key, node->key)) {
         // LOG(WARN, "key:%s has existed", key);
+        printf("key:%s has existed\n", key);
         return;
       }
     }
@@ -147,7 +143,7 @@ struct SkipList<_KeyType, _KeyComparator, _Allocator>::Node {
     return next_[n].load(std::memory_order_acquire);
   }
   void SetNext(int n, Node* x) {
-    assert(n >= 0);
+    // assert(n >= 0);
     // Use a 'release store' so that anybody who reads through this
     // pointer observes a fully initialized version of the inserted node.
     next_[n].store(x, std::memory_order_release);
@@ -195,6 +191,4 @@ int32_t SkipList<_KeyType, _Comparator, _Allocator>::RandomHeight() {
   }
   return height;
 }
-
-}  // namespace corekv
-#endif
+}

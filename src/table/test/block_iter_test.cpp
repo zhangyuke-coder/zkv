@@ -25,7 +25,7 @@ Iterator* getIter(string_view contents) {
 	return iter;
 }
 int main() {
-	options.block_restart_interval = 1;
+	options.block_restart_interval = 16;
 	options.block_compress_type = kSnappyCompression;
 	options.filter_policy = std::make_unique<BloomFilter>(30);
 	options.comparator = std::make_unique<ByteComparator>();
@@ -45,11 +45,11 @@ int main() {
 	DataBlockBuilder* blockBuilder = new DataBlockBuilder(&options);
 	for (const auto& k : kTestKeys) {
 		const string_view key = static_cast<string_view>(k);
-		string v = "_value:";
-		v += k;
-		v += "_";
-		const string_view value = static_cast<string_view>(v);
-		blockBuilder->Add(key, value);
+		// string v = "_value:";
+		// v += k;
+		// v += "_";
+		// const string_view value = static_cast<string_view>(v);
+		blockBuilder->Add(key, key);
 	}
 	blockBuilder->Finish();
 
