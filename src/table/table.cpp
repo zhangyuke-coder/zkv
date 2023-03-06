@@ -9,6 +9,7 @@
 #include "table_options.h"
 #include "caches/cache.h"
 #include <iostream>
+#include "table/iterator_wrapper.h"
 namespace zkv {
 
 using namespace util;
@@ -138,35 +139,34 @@ bool Table::IsContain(std::string_view key) {
 void Table::test_table() {
   // auto iter = BlockReader(ReadOptions(), index_meta_data_);
   auto iter = index_block_->NewIterator(options_->comparator);
-  iter->SeekToFirst();
-  while (iter->Valid()) {
-    // DBStatus s;
-    // OffSetSize offset_size;
-    // OffsetBuilder offset_builder;
-    // std::string contents;
-    // offset_builder.Decode(iter->value().data(), offset_size);
-    // s = ReadBlock(offset_size, contents);
-    // std::string_view reals_data(contents.data(),
-    //                           offset_size.length);
-    // DataBlock* dataBlock;
-    // if (s == Status::kSuccess) {
-    //   dataBlock = new DataBlock(reals_data);
-    // }
-    std::cout << "key" << iter->key() << std::endl;
-    auto itdata = BlockReader(ReadOptions(), iter->value());
-    // auto itdata = dataBlock->NewIterator(options_->comparator);
-    itdata->SeekToFirst();
-    while (itdata->Valid()) {
-      // std::cout << "[" << itdata->key() << "," << itdata->value() << "]"
-      // << " ";
-      itdata->Next();
+  auto iterwrap = IteratorWrapper(iter);
+  iterwrap.SeekToFirst();
+  while (iterwrap.Valid())
+  {
+    /* code */
+    auto itdata = BlockReader(ReadOptions(), iterwrap.value());
+    auto iterdatawrap = IteratorWrapper(itdata);
+    iterdatawrap.SeekToFirst();
+    while (iterdatawrap.Valid()) {
+      std::cout << "[" << iterdatawrap.key() << "," << iterdatawrap.value() << "]"
+		<< " ";
+    iterdatawrap.Next();
     }
     std::cout << std::endl;
-    iter->Next();
+    iterwrap.Next();
   }
-  // std::cout << iter->key() << std::endl;
-  // printf("%u\n", iter->value());
-
+  
+  // iter->SeekToFirst();
+  // while (iter->Valid()) {
+  //   std::cout << "key" << iter->key() << std::endl;
+  //   auto itdata = BlockReader(ReadOptions(), iter->value());
+  //   itdata->SeekToFirst();
+  //   while (itdata->Valid()) {
+  //     itdata->Next();
+  //   }
+  //   std::cout << std::endl;
+  //   iter->Next();
+  // }
 }
 
 
@@ -225,4 +225,46 @@ Iterator* Table::BlockReader(const ReadOptions& options,
   return iter;
 }
 
-}  // namespace corekv
+
+
+
+// class Table::Iter : public Iterator {
+// public:
+//   Iter(std::shared_ptr<Comparator> comparator, std::shared_ptr<DataBlock::Iter> index_iter
+//         ) :
+//       comparator_(comparator), index_iter_(index_iter) {
+
+//   }
+//    ~Iter() {}
+//   bool Valid() const override { 
+//       // printf("valid %u, %u\n", current_, restarts_);
+//       return data_iter_->Valid();
+//   }
+//   void SeekToFirst() {
+//     index_iter_->SeekToFirst();
+//     data_iter_ = BlockReader(ReadOptions(), index_iter_->value());
+//   }
+
+// private:
+//     std::shared_ptr<Comparator> comparator_;
+//     std::shared_ptr<DataBlock::Iter> index_iter_;
+//     std::shared_ptr<DataBlock::Iter> data_iter_;
+//     // const char* const data_; //block 起始位置
+//     // uint32_t const restarts_; //重启点开始位置
+//     // uint32_t const num_restarts_; //重启点数量
+//     // uint32_t restart_index_; //重启点的偏移
+
+
+//     // uint32_t current_;  //当前entry偏移
+//     // uint32_t offset_ = 0; //下一个entry的偏移
+
+
+//     // DBStatus status_;
+//     // std::string key_;
+//     // std::string value_;
+
+
+// };
+
+
+} 
