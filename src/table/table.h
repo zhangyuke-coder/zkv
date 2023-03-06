@@ -28,6 +28,7 @@ private:
     std::string bf_;
     // index_block对象，用于两层迭代器使用
     std::shared_ptr<DataBlock> index_block_;
+    std::string index_meta_data_;
 
 };
-}  // namespace corekv
+}  

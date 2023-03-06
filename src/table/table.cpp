@@ -30,9 +30,10 @@ DBStatus Table::Open(uint64_t file_size) {
   status = footer.DecodeFrom(&st);
   std::string index_meta_data;
   ReadBlock(footer.GetIndexBlockMetaData(), index_meta_data);
-  std::string_view real_data(index_meta_data.data(),
+  std::string real_data(index_meta_data.data(),
                              footer.GetIndexBlockMetaData().length);
-  index_block_ = std::make_shared<DataBlock>(real_data);
+  index_meta_data_ = real_data;
+  index_block_ = std::make_shared<DataBlock>(index_meta_data_);
   // std::cout << index_block_->NumRestarts() << std::endl;
   // testIndex_block();
   // auto iter = index_block_->NewIterator(options_->comparator);
@@ -60,7 +61,7 @@ DBStatus Table::Open(uint64_t file_size) {
   //   std::cout << std::endl;
 
 
-  test_table();
+  // test_table();
 
 
   //sssssssssssssssssssssssssssssssssssssssssssssssssssssssss
@@ -135,28 +136,29 @@ bool Table::IsContain(std::string_view key) {
 }
 
 void Table::test_table() {
-
+  // auto iter = BlockReader(ReadOptions(), index_meta_data_);
   auto iter = index_block_->NewIterator(options_->comparator);
   iter->SeekToFirst();
   while (iter->Valid()) {
-    DBStatus s;
-    OffSetSize offset_size;
-    OffsetBuilder offset_builder;
-    std::string contents;
-    offset_builder.Decode(iter->value().data(), offset_size);
-    s = ReadBlock(offset_size, contents);
-    std::string_view reals_data(contents.data(),
-                              offset_size.length);
-    DataBlock* dataBlock;
-    if (s == Status::kSuccess) {
-      dataBlock = new DataBlock(reals_data);
-    }
-
-    auto itdata = dataBlock->NewIterator(options_->comparator);
+    // DBStatus s;
+    // OffSetSize offset_size;
+    // OffsetBuilder offset_builder;
+    // std::string contents;
+    // offset_builder.Decode(iter->value().data(), offset_size);
+    // s = ReadBlock(offset_size, contents);
+    // std::string_view reals_data(contents.data(),
+    //                           offset_size.length);
+    // DataBlock* dataBlock;
+    // if (s == Status::kSuccess) {
+    //   dataBlock = new DataBlock(reals_data);
+    // }
+    std::cout << "key" << iter->key() << std::endl;
+    auto itdata = BlockReader(ReadOptions(), iter->value());
+    // auto itdata = dataBlock->NewIterator(options_->comparator);
     itdata->SeekToFirst();
     while (itdata->Valid()) {
-      std::cout << "[" << itdata->key() << "," << itdata->value() << "]"
-      << " ";
+      // std::cout << "[" << itdata->key() << "," << itdata->value() << "]"
+      // << " ";
       itdata->Next();
     }
     std::cout << std::endl;
@@ -185,8 +187,12 @@ Iterator* Table::BlockReader(const ReadOptions& options,
       block = cache_handle->value;
     } else {
       s = ReadBlock(offset_size, contents);
+      // std::string_view reals_data(contents.data(),
+      //                         offset_size.length);
+      std::string* reals_data = new std::string(contents.data(),
+                              offset_size.length);
       if (s == Status::kSuccess) {
-        block = new DataBlock(contents);
+        block = new DataBlock(*reals_data);
         {
           block_cache->RegistCleanHandle(DeleteCachedBlock);
           block_cache->Insert(cache_id, block);
@@ -194,9 +200,14 @@ Iterator* Table::BlockReader(const ReadOptions& options,
       }
     }
   } else {
+    
     s = ReadBlock(offset_size, contents);
+    // std::string_view reals_data(contents.data(),
+    //                           offset_size.length);
+    std::string* reals_data = new std::string(contents.data(),
+                              offset_size.length);
     if (s == Status::kSuccess) {
-      block = new DataBlock(contents);
+      block = new DataBlock(*reals_data);
     }
   }
 

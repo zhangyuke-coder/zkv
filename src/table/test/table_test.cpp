@@ -52,7 +52,7 @@ int main() {
     FileReader file_reader(st);
     Table tab(&options, &file_reader);
     tab.Open(FileTool::GetFileSize(st));
-    // tab.test_table();
+    tab.test_table();
     // for (int i = 0; i < 11; ++i) {
 	// 	int idx = i;
 
