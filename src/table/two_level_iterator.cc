@@ -6,6 +6,7 @@
 #include "db/iterator.h"
 #include "db/options.h"
 #include "table/data_block.h"
+#include "table/iterator_wrapper.h"
 // #include "leveldb/table.h"
 // #include "table/block.h"
 // #include "table/format.h"
@@ -14,12 +15,11 @@
 namespace zkv {
 
 namespace {
-
 typedef Iterator* (*BlockFunction)(void*, const ReadOptions&, const std::string_view&);
 
 class TwoLevelIterator : public Iterator {
  public:
-  TwoLevelIterator(std::shared_ptr<DataBlock::Iter> index_iter, BlockFunction block_function,
+  TwoLevelIterator(Iterator* index_iter, BlockFunction block_function,
                    void* arg, const ReadOptions& options);
 
   ~TwoLevelIterator() override;
@@ -30,25 +30,25 @@ class TwoLevelIterator : public Iterator {
   void Next() override;
   void Prev() override;
 
-  bool Valid() const override { return data_iter_->Valid(); }
+  bool Valid() const override { return data_iter_.Valid(); }
   std::string_view key() const override {
     assert(Valid());
-    return data_iter_->key();
+    return data_iter_.key();
   }
   std::string value() override {
     assert(Valid());
-    return data_iter_->value();
+    return data_iter_.value();
   }
-  // DBStatus status() const override {
-  //   // It'd be nice if status() returned a const Status& instead of a Status
-  //   if (!index_iter_->status().ok()) {
-  //     return index_iter_->status();
-  //   } else if (data_iter_ != nullptr && !data_iter_->status().ok()) {
-  //     return data_iter_.status();
-  //   } else {
-  //     return status_;
-  //   }
-  // }
+  DBStatus status() const override {
+    // // It'd be nice if status() returned a const Status& instead of a Status
+    // if (!index_iter_->status().ok()) {
+    //   return index_iter_->status();
+    // } else if (data_iter_ != nullptr && !data_iter_->status().ok()) {
+    //   return data_iter_.status();
+    // } else {
+    //   return status_;
+    // }
+  }
 
  private:
   // void SaveError(const Status& s) {
@@ -63,14 +63,14 @@ class TwoLevelIterator : public Iterator {
   void* arg_;
   const ReadOptions options_;
   DBStatus status_;
-  std::shared_ptr<DataBlock::Iter> index_iter_;
-  std::shared_ptr<DataBlock::Iter> data_iter_;  // May be nullptr
+  IteratorWrapper index_iter_;
+  IteratorWrapper data_iter_;  // May be nullptr
   // If data_iter_ is non-null, then "data_block_handle_" holds the
   // "index_value" passed to block_function_ to create the data_iter_.
   std::string data_block_handle_;
 };
 
-TwoLevelIterator::TwoLevelIterator(std::shared_ptr<DataBlock::Iter> index_iter,
+TwoLevelIterator::TwoLevelIterator(Iterator* index_iter,
                                    BlockFunction block_function, void* arg,
                                    const ReadOptions& options)
     : block_function_(block_function),
@@ -98,9 +98,9 @@ TwoLevelIterator::~TwoLevelIterator() {
 // }
 
 void TwoLevelIterator::SeekToFirst() {
-  index_iter_->SeekToFirst();
+  index_iter_.SeekToFirst();
   InitDataBlock();
-  if (data_iter_ != nullptr) data_iter_->SeekToFirst();
+  if (data_iter_.iter() != nullptr) data_iter_.SeekToFirst();
   SkipEmptyDataBlocksForward();
 }
 
@@ -157,14 +157,14 @@ void TwoLevelIterator::SetDataIterator(Iterator* data_iter) {
 
 void TwoLevelIterator::InitDataBlock() {
   // 最外层都显示无效了，内部也直接设置无效
-  if (!index_iter_->Valid()) {
+  if (!index_iter_.Valid()) {
     SetDataIterator(nullptr);
   } else {
     // 否则取出内部的值
     // LevelFileNumIterator对应的value是文件编号和文件的大小
     std::string_view handle = index_iter_.value();
     // 第一次为null，走下面的分支，如果一级索引对应下的二级索引已经构建，那就不需要在构建了
-    if (data_iter_->iter() != nullptr &&
+    if (data_iter_.iter() != nullptr &&
         handle.compare(data_block_handle_) == 0) {
       // data_iter_ is already constructed with this iterator, so
       // no need to change anything
@@ -182,7 +182,7 @@ void TwoLevelIterator::InitDataBlock() {
 
 // 第一级是index_iter
 // 第二级是block_function回调函数
-Iterator* NewTwoLevelIterator(std::shared_ptr<DataBlock::Iter>,
+Iterator* NewTwoLevelIterator(Iterator* index_iter,
                               BlockFunction block_function, void* arg,
                               const ReadOptions& options) {
   return new TwoLevelIterator(index_iter, block_function, arg, options);

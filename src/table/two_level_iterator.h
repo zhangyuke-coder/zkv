@@ -6,7 +6,7 @@
 #define STORAGE_LEVELDB_TABLE_TWO_LEVEL_ITERATOR_H_
 
 #include <db/iterator.h>
-
+#include "table/table.h"
 namespace zkv {
 
 struct ReadOptions;
@@ -21,8 +21,8 @@ struct ReadOptions;
 // Uses a supplied function to convert an index_iter value into
 // an iterator over the contents of the corresponding block.
 Iterator* NewTwoLevelIterator(
-    std::shared_ptr<DataBlock::Iter> index_iter,
-    Iterator* (*block_function)(void* arg, const ReadOptions& options,
+    Iterator* index_iter,
+    DataBlock::Iter* (*block_function)(void* arg, const ReadOptions& options,
                                 const std::string_view& index_value),
     void* arg, const ReadOptions& options);
 

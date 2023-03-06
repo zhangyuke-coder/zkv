@@ -10,6 +10,7 @@
 #include "caches/cache.h"
 #include <iostream>
 #include "table/iterator_wrapper.h"
+#include "table/two_level_iterator.h"
 namespace zkv {
 
 using namespace util;
@@ -144,7 +145,7 @@ void Table::test_table() {
   while (iterwrap.Valid())
   {
     /* code */
-    auto itdata = BlockReader(ReadOptions(), iterwrap.value());
+    auto itdata = BlockReader(this, ReadOptions(), iterwrap.value());
     auto iterdatawrap = IteratorWrapper(itdata);
     iterdatawrap.SeekToFirst();
     while (iterdatawrap.Valid()) {
@@ -170,9 +171,10 @@ void Table::test_table() {
 }
 
 
-Iterator* Table::BlockReader(const ReadOptions& options,
+Iterator* Table::BlockReader(void* arg, const ReadOptions& options,
                              const std::string_view& index_value) {
-  auto* block_cache = options_->block_cache;
+  Table* table = reinterpret_cast<Table*>(arg);
+  auto* block_cache = table->options_->block_cache;
   DataBlock* block = nullptr;
   CacheNode<uint64_t, DataBlock>* cache_handle = nullptr;
   OffSetSize offset_size;
@@ -181,12 +183,12 @@ Iterator* Table::BlockReader(const ReadOptions& options,
   DBStatus s;
   std::string contents;
   if (block_cache != nullptr) {
-    uint64_t cache_id = table_id_ * 10 + offset_size.offset;
+    uint64_t cache_id = table->table_id_ * 10 + offset_size.offset;
     cache_handle = block_cache->Get(cache_id);
     if (cache_handle != nullptr) {
       block = cache_handle->value;
     } else {
-      s = ReadBlock(offset_size, contents);
+      s = table->ReadBlock(offset_size, contents);
       // std::string_view reals_data(contents.data(),
       //                         offset_size.length);
       std::string* reals_data = new std::string(contents.data(),
@@ -201,7 +203,7 @@ Iterator* Table::BlockReader(const ReadOptions& options,
     }
   } else {
     
-    s = ReadBlock(offset_size, contents);
+    s = table->ReadBlock(offset_size, contents);
     // std::string_view reals_data(contents.data(),
     //                           offset_size.length);
     std::string* reals_data = new std::string(contents.data(),
@@ -213,7 +215,7 @@ Iterator* Table::BlockReader(const ReadOptions& options,
 
   Iterator* iter;
   if (block != nullptr) {
-    iter = block->NewIterator(options_->comparator);
+    iter = block->NewIterator(table->options_->comparator);
     if (cache_handle == nullptr) {
       iter->RegisterCleanup(&DeleteBlock, block, nullptr);
     } else {
@@ -226,7 +228,11 @@ Iterator* Table::BlockReader(const ReadOptions& options,
 }
 
 
-
+// Iterator* Table::NewIterator(std::shared_ptr<Comparator> comparator) {
+//   return NewTwoLevelIterator(
+//       index_block_->NewIterator(options_->comparator),
+//       &Table::BlockReader, const_cast<Table*>(this), ReadOptions());
+// }
 
 // class Table::Iter : public Iterator {
 // public:

@@ -16,7 +16,7 @@ public:
     void ReadMeta(const Footer* footer);
     void ReadFilter(const std::string_view& filter_handle_value);
     Iterator* NewIterator(const ReadOptions&) const;
-    Iterator* BlockReader(const ReadOptions&,
+    static Iterator* BlockReader(void* arg, const ReadOptions&,
                                 const std::string_view&);
     
     bool IsContain(std::string_view key);

@@ -2,6 +2,7 @@
 #include "utils/util.h"
 #include "utils/codec.h"
 #include "db/comparator.h"
+#include "table/two_level_iterator.h"
 namespace zkv {
 using namespace util;
 DataBlock::DataBlock(const std::string_view& contents)
