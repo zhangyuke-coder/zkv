@@ -228,11 +228,11 @@ Iterator* Table::BlockReader(void* arg, const ReadOptions& options,
 }
 
 
-// Iterator* Table::NewIterator(std::shared_ptr<Comparator> comparator) {
-//   return NewTwoLevelIterator(
-//       index_block_->NewIterator(options_->comparator),
-//       &Table::BlockReader, const_cast<Table*>(this), ReadOptions());
-// }
+Iterator* Table::NewIterator(std::shared_ptr<Comparator> comparator) {
+  return NewTwoLevelIterator(
+      index_block_->NewIterator(options_->comparator),
+      &Table::BlockReader, const_cast<Table*>(this), ReadOptions());
+}
 
 // class Table::Iter : public Iterator {
 // public:

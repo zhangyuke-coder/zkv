@@ -78,7 +78,7 @@ public:
         return key_;
     }
     std::string value() override {
-        assert(Valid());
+        // assert(Valid());
         return value_;
     }
 

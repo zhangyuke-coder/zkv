@@ -23,7 +23,6 @@ public:
     void test_table();
     Iterator* NewIterator(std::shared_ptr<Comparator> comparator);
 private:
-    class Iter;
     const Options* options_;
     const FileReader* file_reader_;
     uint64_t table_id_ = 0;

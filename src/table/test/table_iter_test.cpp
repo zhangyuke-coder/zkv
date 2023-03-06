@@ -10,7 +10,7 @@
 #include "file/file.h"
 #include "filter/bloomfilter.h"
 #include "table/table.h"
-
+#include "table/two_level_iterator.h"
 using namespace std;
 using namespace zkv;
 int main() {
@@ -40,6 +40,12 @@ int main() {
     FileReader file_reader(st);
     Table tab(&options, &file_reader);
     tab.Open(FileTool::GetFileSize(st));
-    tab.test_table();
-    
+    // tab.test_table();
+    auto iter = tab.NewIterator(options.comparator);
+    // iter->testIter();
+    iter->SeekToFirst();
+    // while(iter->Valid()) {
+    //     std::cout << iter->key() << "  " << iter->value() << std::endl;
+    //     iter->Next();
+    // }
 }

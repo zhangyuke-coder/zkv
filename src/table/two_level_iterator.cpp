@@ -7,6 +7,7 @@
 #include "db/options.h"
 #include "table/data_block.h"
 #include "table/iterator_wrapper.h"
+#include <iostream>
 // #include "leveldb/table.h"
 // #include "table/block.h"
 // #include "table/format.h"
@@ -16,14 +17,28 @@ namespace zkv {
 
 namespace {
 typedef Iterator* (*BlockFunction)(void*, const ReadOptions&, const std::string_view&);
-
 class TwoLevelIterator : public Iterator {
  public:
   TwoLevelIterator(Iterator* index_iter, BlockFunction block_function,
                    void* arg, const ReadOptions& options);
 
   ~TwoLevelIterator() override;
-
+  void testIter() {
+     while (index_iter_.Valid())
+  {
+    /* code */
+    auto itdata = (*block_function_)(arg_, options_, index_iter_.value());
+    auto iterdatawrap = IteratorWrapper(itdata);
+    iterdatawrap.SeekToFirst();
+    while (iterdatawrap.Valid()) {
+      std::cout << "[" << iterdatawrap.key() << "," << iterdatawrap.value() << "]"
+		<< " ";
+    iterdatawrap.Next();
+    }
+    std::cout << std::endl;
+    index_iter_.Next();
+  }
+  }
   void Seek(const std::string_view& target) override;
   void SeekToFirst() override;
   void SeekToLast() override;
@@ -86,30 +101,47 @@ TwoLevelIterator::~TwoLevelIterator() {
 
 }
 
-// void TwoLevelIterator::Seek(const std::string_view& target) {
-//   // 一级索引找到taget在从哪个SST文件开始查找
-//   index_iter_.Seek(target);
-//   // 初始化data_block
-//   InitDataBlock();
-//   // 在二级索引中查找数据
-//   if (data_iter_.iter() != nullptr) data_iter_.Seek(target);
-//   // 跳过背后为空的data_block索引
-//   SkipEmptyDataBlocksForward();
-// }
+void TwoLevelIterator::Seek(const std::string_view& target) {
+  // 一级索引找到taget在从哪个SST文件开始查找
+  index_iter_.Seek(target);
+  // 初始化data_block
+  InitDataBlock();
+  // 在二级索引中查找数据
+  if (data_iter_.iter() != nullptr) data_iter_.Seek(target);
+  // 跳过背后为空的data_block索引
+  SkipEmptyDataBlocksForward();
+}
 
 void TwoLevelIterator::SeekToFirst() {
   index_iter_.SeekToFirst();
+  //////////////////////////////////////////////////
+while (index_iter_.Valid())
+  {
+    /* code */
+    auto itdata = (*block_function_)(arg_, options_, index_iter_.value());
+    auto iterdatawrap = IteratorWrapper(itdata);
+    iterdatawrap.SeekToFirst();
+    while (iterdatawrap.Valid()) {
+      std::cout << "[" << iterdatawrap.key() << "," << iterdatawrap.value() << "]"
+		<< " ";
+    iterdatawrap.Next();
+    }
+    std::cout << std::endl;
+    index_iter_.Next();
+  }
+  /////////////////////////////////////////////////
+  
   InitDataBlock();
   if (data_iter_.iter() != nullptr) data_iter_.SeekToFirst();
   SkipEmptyDataBlocksForward();
 }
 
-// void TwoLevelIterator::SeekToLast() {
-//   index_iter_.SeekToLast();
-//   InitDataBlock();
-//   if (data_iter_.iter() != nullptr) data_iter_.SeekToLast();
-//   SkipEmptyDataBlocksBackward();
-// }
+void TwoLevelIterator::SeekToLast() {
+  index_iter_.SeekToLast();
+  InitDataBlock();
+  if (data_iter_.iter() != nullptr) data_iter_.SeekToLast();
+  SkipEmptyDataBlocksBackward();
+}
 
 void TwoLevelIterator::Next() {
   assert(Valid());
@@ -117,11 +149,11 @@ void TwoLevelIterator::Next() {
   SkipEmptyDataBlocksForward();
 }
 
-// void TwoLevelIterator::Prev() {
-//   assert(Valid());
-//   data_iter_.Prev();
-//   SkipEmptyDataBlocksBackward();
-// }
+void TwoLevelIterator::Prev() {
+  assert(Valid());
+  data_iter_.Prev();
+  SkipEmptyDataBlocksBackward();
+}
 
 void TwoLevelIterator::SkipEmptyDataBlocksForward() {
   while (data_iter_.iter() == nullptr || !data_iter_.Valid()) {
@@ -156,6 +188,23 @@ void TwoLevelIterator::SetDataIterator(Iterator* data_iter) {
 }
 
 void TwoLevelIterator::InitDataBlock() {
+  ////////////////////////////////////////
+  //  while (index_iter_.Valid())
+  // {
+  //   /* code */
+  //   auto itdata = (*block_function_)(arg_, options_, index_iter_.value());
+  //   auto iterdatawrap = IteratorWrapper(itdata);
+  //   iterdatawrap.SeekToFirst();
+  //   while (iterdatawrap.Valid()) {
+  //     std::cout << "[" << iterdatawrap.key() << "," << iterdatawrap.value() << "]"
+	// 	<< " ";
+  //   iterdatawrap.Next();
+  //   }
+  //   std::cout << std::endl;
+  //   index_iter_.Next();
+  // }
+  ////////////////////////////////////////
+   
   // 最外层都显示无效了，内部也直接设置无效
   if (!index_iter_.Valid()) {
     SetDataIterator(nullptr);

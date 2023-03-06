@@ -33,5 +33,13 @@ target_link_libraries( iter_wrapper
         zkv_file
         zkv_bloom
         zkv_table)
+        
 
+add_executable(table_iter_test table_iter_test.cpp)
+target_link_libraries( table_iter_test
+        ${GTEST_BOTH_LIBRARIES} 
+        pthread
+        zkv_file
+        zkv_bloom
+        zkv_table)
 # gtest_discover_tests(allocTest)
