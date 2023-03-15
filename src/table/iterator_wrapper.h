@@ -44,7 +44,7 @@ class IteratorWrapper {
     return key_;
   }
   std::string value() const {
-    assert(Valid());
+    // assert(Valid());
     return iter_->value();
   }
   // Methods below require iter() != nullptr

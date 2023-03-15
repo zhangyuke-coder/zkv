@@ -115,20 +115,20 @@ void TwoLevelIterator::Seek(const std::string_view& target) {
 void TwoLevelIterator::SeekToFirst() {
   index_iter_.SeekToFirst();
   //////////////////////////////////////////////////
-while (index_iter_.Valid())
-  {
-    /* code */
-    auto itdata = (*block_function_)(arg_, options_, index_iter_.value());
-    auto iterdatawrap = IteratorWrapper(itdata);
-    iterdatawrap.SeekToFirst();
-    while (iterdatawrap.Valid()) {
-      std::cout << "[" << iterdatawrap.key() << "," << iterdatawrap.value() << "]"
-		<< " ";
-    iterdatawrap.Next();
-    }
-    std::cout << std::endl;
-    index_iter_.Next();
-  }
+// while (index_iter_.Valid())
+//   {
+//     /* code */
+//     auto itdata = (*block_function_)(arg_, options_, index_iter_.value());
+//     auto iterdatawrap = IteratorWrapper(itdata);
+//     iterdatawrap.SeekToFirst();
+//     while (iterdatawrap.Valid()) {
+//       std::cout << "[" << iterdatawrap.key() << "," << iterdatawrap.value() << "]"
+// 		<< " ";
+//     iterdatawrap.Next();
+//     }
+//     std::cout << std::endl;
+//     index_iter_.Next();
+//   }
   /////////////////////////////////////////////////
   
   InitDataBlock();
@@ -188,7 +188,7 @@ void TwoLevelIterator::SetDataIterator(Iterator* data_iter) {
 }
 
 void TwoLevelIterator::InitDataBlock() {
-  ////////////////////////////////////////
+  //////////////////////////////////////
   //  while (index_iter_.Valid())
   // {
   //   /* code */
@@ -203,28 +203,34 @@ void TwoLevelIterator::InitDataBlock() {
   //   std::cout << std::endl;
   //   index_iter_.Next();
   // }
+  std::string_view handle = index_iter_.value();
+  auto itdata = (*block_function_)(arg_, options_, index_iter_.value());
+  data_block_handle_.assign(handle.data(), handle.size());
+      // 设置二级索引的值
+  SetDataIterator(itdata);
   ////////////////////////////////////////
    
+
   // 最外层都显示无效了，内部也直接设置无效
-  if (!index_iter_.Valid()) {
-    SetDataIterator(nullptr);
-  } else {
-    // 否则取出内部的值
-    // LevelFileNumIterator对应的value是文件编号和文件的大小
-    std::string_view handle = index_iter_.value();
-    // 第一次为null，走下面的分支，如果一级索引对应下的二级索引已经构建，那就不需要在构建了
-    if (data_iter_.iter() != nullptr &&
-        handle.compare(data_block_handle_) == 0) {
-      // data_iter_ is already constructed with this iterator, so
-      // no need to change anything
-    } else {
-      // 回调函数 是table_cache->NewIterator
-      Iterator* iter = (*block_function_)(arg_, options_, handle);
-      data_block_handle_.assign(handle.data(), handle.size());
-      // 设置二级索引的值
-      SetDataIterator(iter);
-    }
-  }
+  // if (!index_iter_.Valid()) {
+  //   SetDataIterator(nullptr);
+  // } else {
+  //   // 否则取出内部的值
+  //   // LevelFileNumIterator对应的value是文件编号和文件的大小
+  //   std::string_view handle = index_iter_.value();
+  //   // 第一次为null，走下面的分支，如果一级索引对应下的二级索引已经构建，那就不需要在构建了
+  //   if (data_iter_.iter() != nullptr &&
+  //       handle.compare(data_block_handle_) == 0) {
+  //     // data_iter_ is already constructed with this iterator, so
+  //     // no need to change anything
+  //   } else {
+  //     // 回调函数 是table_cache->NewIterator
+  //     Iterator* iter = (*block_function_)(arg_, options_, handle);
+  //     data_block_handle_.assign(handle.data(), handle.size());
+  //     // 设置二级索引的值
+  //     SetDataIterator(iter);
+  //   }
+  // }
 }
 
 }  // namespace

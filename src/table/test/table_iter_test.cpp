@@ -24,7 +24,7 @@ int main() {
     FileWriter* file_handler = new FileWriter(st);
     TableBuilder* tb = new TableBuilder(options, file_handler);
     vector<string> kTestKeys = {};
-	for (int i = 0; i < 1000; ++i) {
+	for (int i = 0; i < 10000; ++i) {
 		int idx = i;
 
 		string k = "key";
@@ -44,8 +44,9 @@ int main() {
     auto iter = tab.NewIterator(options.comparator);
     // iter->testIter();
     iter->SeekToFirst();
-    // while(iter->Valid()) {
-    //     std::cout << iter->key() << "  " << iter->value() << std::endl;
-    //     iter->Next();
-    // }
+    while(iter->Valid()) {
+        std::cout << iter->key() << "  " << iter->value() << std::endl;
+        iter->Next();
+    }
+
 }
