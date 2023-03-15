@@ -61,13 +61,16 @@ int main() {
 	// // cout << dataBlock->NumRestarts() << endl;
 	// Iterator* iter = dataBlock->NewIterator(options.comparator);
 	auto iter = getIter(contents);
-	iter->SeekToFirst();
-	while (iter->Valid()) {
-		cout << "[" << iter->key() << "," << iter->value() << "]"
+	// iter->SeekToFirst();
+	// while (iter->Valid()) {
+	// 	cout << "[" << iter->key() << "," << iter->value() << "]"
+	// 	<< " ";
+	// 	iter->Next();
+	// }
+	// cout << endl;
+	iter->Seek("key1");
+	cout << "[" << iter->key() << "," << iter->value() << "]"
 		<< " ";
-		iter->Next();
-	}
-	cout << endl;
 	// iter->SeekToLast();
 	// while (iter->Valid()) {
 	// 	cout << "[" << iter->key() << "," << iter->value() << "]"

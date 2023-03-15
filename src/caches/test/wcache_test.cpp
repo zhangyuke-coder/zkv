@@ -9,7 +9,7 @@ using namespace zkv;
 static const vector<string> kTestKeys = {"corekv", "corekv1", "corekv2"};
 int main() {
     std::shared_ptr<Cache<std::string, std::string>> cache_handler =
-        std::make_shared<ShardCache<std::string, std::string>>(10);
+        std::make_shared<WTinyLFU<std::string, std::string>>(10);
     cache_handler->RegistCleanHandle([](const std::string&, std::string* value){
         delete value;
         std::cout << "value:"<< std::endl;

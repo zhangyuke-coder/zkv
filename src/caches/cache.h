@@ -78,4 +78,48 @@ private:
     // 采用impl的机制来进行实现
     std::vector<std::shared_ptr<CachePolicy<KeyType, ValueType>>> cache_impl_;
 };
+
+
+
+
+
+
+
+
+
+
+
+// template <typename KeyType, typename ValueType>
+// class WTinyLFU final : public Cache<KeyType, ValueType> {
+// public:
+//     WTinyLFU() {
+
+//     }
+//     ~WTinyLFU() = default;
+//     const char* Name() {
+//         return "WTinyLFU";
+//     }
+//     void Insert(const KeyType& key, ValueType* value,
+//                         uint32_t ttl = 0) {
+
+//     }
+//     CacheNode<KeyType, ValueType>* Get(const KeyType& key)  {
+
+//     }
+//     void Release(CacheNode<KeyType, ValueType>* node) {
+        
+//     }
+//     void Prune() {
+
+//     }
+//     void Erase(const KeyType& key) {
+
+//     }
+//     void RegistCleanHandle(
+//         std::function<void(const KeyType& key, ValueType* value)> destructor) {
+
+//     }
+// private:
+//     std::shared_ptr<CachePolicy<KeyType, ValueType>> cache_impl_;
+// };
 }

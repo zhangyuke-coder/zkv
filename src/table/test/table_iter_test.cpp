@@ -40,13 +40,10 @@ int main() {
     FileReader file_reader(st);
     Table tab(&options, &file_reader);
     tab.Open(FileTool::GetFileSize(st));
-    // tab.test_table();
     auto iter = tab.NewIterator(options.comparator);
-    // iter->testIter();
-    iter->SeekToFirst();
-    while(iter->Valid()) {
-        std::cout << iter->key() << "  " << iter->value() << std::endl;
-        iter->Next();
-    }
+    iter->Seek("key-asdf");
+    std::cout << iter->key() << " " << iter->value() << std::endl;
+     iter->Seek("key555");
+    std::cout << iter->key() << " " << iter->value() << std::endl;
 
 }
