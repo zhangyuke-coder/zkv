@@ -7,7 +7,7 @@
 namespace zkv {
 enum SEGMENT_ZONE
 {
-	PROBATION = 0,
+	PROBATION,
 	PROTECTION
 };
 template <typename KeyType, typename ValueType>
@@ -16,7 +16,7 @@ public:
     using Node = WCacheNode<KeyType, ValueType>;
 	explicit Wslru(size_t probationCapacity, size_t protectionCapacity)
 		: probationCapacity_(probationCapacity)
-		, probationCapacity_(protectionCapacity)
+		, protectionCapacity_(protectionCapacity)
 		, hashmap_(probationCapacity +  protectionCapacity)
 	{}
 
@@ -30,10 +30,10 @@ public:
     }
     bool put(Node* newNode, Node* delNode) {
 
-        newNode->stage_ = PROBATION
+        newNode->stage_ = PROBATION;
         if(probationList_.size() < probationCapacity_ || size() < probationCapacity_ + protectionCapacity_) {
             probationList_.push_front(newNode);
-            hashmap[newNode->hash] = probationList_.begin();
+            hashmap_[newNode->hash] = probationList_.begin();
             return false;
         }
 
@@ -45,9 +45,9 @@ public:
         hashmap_[newNode->hash] = probationList_.begin();
 		return true;
     } 
-    bool get(const Node& node, Node* curNode) {
+    bool get(Node& node, Node* curNode) {
 
-        auto res = hashmap_.find(node->hash);
+        auto res = hashmap_.find(node.hash);
 
 		if (res == hashmap_.end())
 		{
@@ -62,46 +62,55 @@ public:
 		{
             protectionList_.erase(pos);
 
-
-			protectionList_.push_front(node);
-            *curNode = *(*pos);
+            *curNode = node;
+			protectionList_.push_front(curNode);
+            
 			res->second = protectionList_.begin();
 			
             return true;
 		}
 
-		if (_protectionList.size() < _probationCapacity)
+		if (protectionList_.size() < protectionCapacity_)
 		{
 			node.stage_ = PROTECTION;
-			_probationList.erase(pos);
-
-			_protectionList.push_front(node);
-			res->second = _protectionList.begin();
-
-			return std::make_pair(node, true);
+			probationList_.erase(pos);
+            *curNode = node;
+			protectionList_.push_front(curNode);
+			res->second = protectionList_.begin();
+            
+			return true;
 		}
 
-		LRUNode backNode = _protectionList.back();
+		auto backNode = protectionList_.back();
 
-		std::swap(backNode._flag, node._flag);
+		std::swap(backNode->stage_, node.stage_);
 
-		_probationList.erase(_hashmap[node._key]);
-		_protectionList.erase(_hashmap[backNode._key]);
+		probationList_.erase(hashmap_[node.hash]);
+		protectionList_.erase(hashmap_[backNode->hash]);
+        *curNode = node;
+		probationList_.push_front(backNode);
+		protectionList_.push_front(curNode);
 
-		_probationList.push_front(backNode);
-		_protectionList.push_front(node);
-
-		_hashmap[backNode._key] = _probationList.begin();
-		_hashmap[node._key] = _protectionList.begin();
+		hashmap_[backNode->hash] = probationList_.begin();
+		hashmap_[node.hash] = protectionList_.begin();
 
 
-		return std::make_pair(node, true);
+		return true;
+    }
+    bool victim(Node* curNode) {
+
+		if (probationCapacity_ + protectionCapacity_ > size())
+		{
+			return false;
+		}
+        *curNode = *(probationList_.back());
+		return true;
     }
 private:
     size_t probationCapacity_;
     size_t protectionCapacity_;
 
-    std::unordered_map<int, typename std::list<Node>::iterator> hashmap_;
+    std::unordered_map<uint32_t, typename std::list<Node*>::iterator> hashmap_;
 
     std::list<Node*> probationList_;
     std::list<Node*> protectionList_;
