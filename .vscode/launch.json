@@ -8,7 +8,7 @@
             "name": "(gdb)附加",
             "type": "cppdbg",
             "request": "attach",
-            "program": "${fileDirname}/src/build/bin/wlru_test",
+            "program": "${fileDirname}/src/build/bin/skiplist_iter_test",
             "MIMode": "gdb",
             "setupCommands": [
                 {
@@ -27,7 +27,7 @@
             "name":"(gdb)启动调试",    //name随便取，用来在定义了多个configuration的时候区分执行的是哪一套参数。
             "type":"cppdbg",        //这个一般就不要改了，这个我还不了解其他的参数配置
             "request":"launch",    //这个一般就不要改了，这个我还不了解其他的参数配置
-            "program":"${fileDirname}/src/build/bin/wlru_test",    //执行这个文件，相当于命令行中输入这行
+            "program":"${fileDirname}/src/build/bin/skiplist_iter_test",    //执行这个文件，相当于命令行中输入这行
             "args":[],    //program的参数，相当于命令行中在program后输入用空格隔开的这些参数。我这里前两个是执行文件自带的参数设置，后三个是将标准输出和标准错误输入到文件out中。
             "stopAtEntry":false,    //大概是表示是否在main函数处停下，类似在main上打断点。
             "cwd":"${fileDirname}",    //表示在哪个目录下执行program，相当于命令行中输入cd 该行

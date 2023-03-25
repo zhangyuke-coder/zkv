@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include <stdint.h>
 #include <atomic>
+#include <assert.h>
 #include "../utils/random_util.h"
 namespace zkv {
 struct SkipListOption {
@@ -55,7 +56,44 @@ class SkipList final {
   bool Equal(const _KeyType& a, const _KeyType& b) {
     return comparator_.Compare(a, b) == 0;
   }
+// Iteration over the contents of a skip list
+  class Iterator {
+   public:
+    // Initialize an iterator over the specified list.
+    // The returned iterator is not valid.
+    explicit Iterator(const SkipList* list);
 
+    // Returns true iff the iterator is positioned at a valid node.
+    bool Valid() const;
+
+    // Returns the key at the current position.
+    // REQUIRES: Valid()
+    const _KeyType& key() const;
+
+    // Advances to the next position.
+    // REQUIRES: Valid()
+    void Next();
+
+    // Advances to the previous position.
+    // REQUIRES: Valid()
+    void Prev();
+
+    // Advance to the first entry with a key >= target
+    void Seek(const _KeyType& target);
+
+    // Position at the first entry in list.
+    // Final state of iterator is Valid() iff list is not empty.
+    void SeekToFirst();
+
+    // Position at the last entry in list.
+    // Final state of iterator is Valid() iff list is not empty.
+    void SeekToLast();
+
+   private:
+    const SkipList* list_;
+    Node* node_;
+    // Intentionally copyable
+  };
  private:
   Node* NewNode(const _KeyType& key, int32_t height);
   int32_t RandomHeight();
@@ -191,4 +229,65 @@ int32_t SkipList<_KeyType, _Comparator, _Allocator>::RandomHeight() {
   }
   return height;
 }
+
+
+
+
+
+template <typename _KeyType, class _Comparator, typename _Allocator>
+inline SkipList<_KeyType, _Comparator, _Allocator>::Iterator::Iterator(const SkipList* list) {
+  list_ = list;
+  node_ = nullptr;
+}
+
+template <typename _KeyType, class _Comparator, typename _Allocator>
+inline bool SkipList<_KeyType, _Comparator, _Allocator>::Iterator::Valid() const {
+  return node_ != nullptr;
+}
+
+template <typename _KeyType, class _Comparator, typename _Allocator>
+inline const _KeyType& SkipList<_KeyType, _Comparator, _Allocator>::Iterator::key() const {
+  assert(Valid());
+  return node_->key;
+}
+
+template <typename _KeyType, class _Comparator, typename _Allocator>
+inline void SkipList<_KeyType, _Comparator, _Allocator>::Iterator::Next() {
+  assert(Valid());
+  node_ = node_->Next(0);
+}
+
+template <typename _KeyType, class _Comparator, typename _Allocator>
+inline void SkipList<_KeyType, _Comparator, _Allocator>::Iterator::Prev() {
+  // Instead of using explicit "prev" links, we just search for the
+  // last node that falls before key.
+  assert(Valid());
+  node_ = list_->FindLessThan(node_->key);
+  if (node_ == list_->head_) {
+    node_ = nullptr;
+  }
+}
+
+template <typename _KeyType, class _Comparator, typename _Allocator>
+inline void SkipList<_KeyType, _Comparator, _Allocator>::Iterator::Seek(const _KeyType& target) {
+  node_ = list_->FindGreaterOrEqual(target, nullptr);
+}
+
+template <typename _KeyType, class _Comparator, typename _Allocator>
+inline void SkipList<_KeyType, _Comparator, _Allocator>::Iterator::SeekToFirst() {
+  node_ = list_->head_->Next(0);
+}
+
+template <typename _KeyType, class _Comparator, typename _Allocator>
+inline void SkipList<_KeyType, _Comparator, _Allocator>::Iterator::SeekToLast() {
+  node_ = list_->FindLast();
+  if (node_ == list_->head_) {
+    node_ = nullptr;
+  }
+}
+
+
+
+
+
 }

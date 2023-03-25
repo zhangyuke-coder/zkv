@@ -38,25 +38,25 @@ int main() {
     //     tb.Insert(s.data());
     // }
 
-    for(auto s : kTestKeys) {
-        tb.Insert(s.data());
-        // if(tb.Contains(s.data())) {
-        //     cout << "true" << endl;
-        // } else {
-        //     cout << "false" << endl;
-        // }
-    }
-
+    // for(auto s : kTestKeys) {
+    //     tb.Insert(s.data());
+    //     // if(tb.Contains(s.data())) {
+    //     //     cout << "true" << endl;
+    //     // } else {
+    //     //     cout << "false" << endl;
+    //     // }
+    // }
 
 
 
 
     // tb.Insert(kTestKeys[0].data());
-    // tb.Insert(kTestKeys[1].data());
-    // tb.Insert(kTestKeys[2].data());
-    // tb.Insert(kTestKeys[3].data());
-    // tb.Insert(kTestKeys[4].data());
-    // tb.Insert(kTestKeys[5].data());
+    tb.Insert(kTestKeys[0].data());
+    tb.Insert(kTestKeys[1].data());
+    tb.Insert(kTestKeys[2].data());
+    tb.Insert(kTestKeys[3].data());
+    tb.Insert(kTestKeys[4].data());
+    tb.Insert(kTestKeys[5].data());
     if(tb.Contains("corekv")) {
         cout << "true" << endl;
     } else {
